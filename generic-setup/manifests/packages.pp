@@ -1,11 +1,11 @@
-# install every package that doesn't need configuration (or at least just a simple
+# install every package that doesn't need configuration (or at least just a simple one)
 
 # todo: install pflogsumm only for mailserver
 # todo: load modules for lm-sensors
 # todo: we currently only support gentoo on physical hosts
 # todo: screen config
 class generic-setup::packages {
-	$packages = [	'logwatch', 
+	$packages_for_centos_and_debian = [	'logwatch', 
 										'git', 
 										'htop', 
 										'nload', 
@@ -26,23 +26,25 @@ class generic-setup::packages {
 										'bsd-mailx' ]
 	case $::virtual{
 		'physical': { 
-			$packages += ['smartmontools', 'ethtool', 'pciutils', 'ethtool', 'lm-sensors']
+				# https://projects.puppetlabs.com/issues/3300 - really pupetlabs?? really?! FUUUUUUUUUUUUU!!!!!!11
+			$packages_for_centos_and_debian_including_physical_hosts = ([$packages_for_centos_and_debian, 'smartmontools', 'ethtool', 'pciutils', 'ethtool', 'lm-sensors'].reduce([]) |$memo, $x| { if $x == undef { $memo } else {$memo << $x} })
 			case $::processor0{
-				/Intel/:{ $packages += ['intel-microcode']}
-				/AMD/:{ $packages += ['amd-microcode']}
+				/Intel/:{ $packages_for_centos_and_debian_including_physical_hosts_and_their_cpu = ([$packages_for_centos_and_debian_including_physical_hosts, 'intel-microcode'].reduce([]) |$memo, $x| { if $x == undef { $memo } else {$memo << $x} })
+				/AMD/:{ $packages_for_centos_and_debian_including_physical_hosts_and_their_cpu = ([$packages_for_centos_and_debian_including_physical_hosts, 'amd-microcode'].reduce([]) |$memo, $x| { if $x == undef { $memo } else {$memo << $x} })
+
 			}
 		}
 	}
 	case $::operatingsystem{
 		'Debian': {
-			$packages += ['augeas-tools', 'uptimed']
-			package { $packages:
+			$packages_debian = ['augeas-tools', 'uptimed']
+			package { [$packages_for_centos_and_debian_including_physical_hosts_and_their_cpu, $packages_debian]:
 				ensure => present,
 			}
 		}
 		'CentOS':{
-			$packages += ['augeas']
-			package{$packages:
+			$packages_centos = ['augeas']
+			package{$packages_for_centos_and_debian_including_physical_hosts_and_their_cpu, $packages_centos:
 				ensure => present,
 			}
 		}
