@@ -1,0 +1,3 @@
+class generic-setup::ssh {
+
+}
