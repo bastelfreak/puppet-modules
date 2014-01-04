@@ -3,21 +3,47 @@
 # todo: install pflogsumm only for mailserver
 # todo: load modules for lm-sensors
 # todo: we currently only support gentoo on physical hosts
+# todo: screen config
 class generic-setup::packages {
+	$packages = [	'logwatch', 
+										'git', 
+										'htop', 
+										'nload', 
+										'sysstat', 
+										'iftop', 
+										'nmap', 
+										'screen', 
+										'fail2ban', 
+										'postfix', 
+										'tcpdump', 
+										'mtr', 
+										'vim', 
+										'bash-completion', 
+										'ferm', 
+										'iptraf', 
+										'acpid', 
+										'munin-node', 
+										'bsd-mailx' ]
+	case $::virtual{
+		'physical': { 
+			$packages += ['smartmontools', 'ethtool', 'pciutils', 'ethtool', 'lm-sensors']
+			case $::processor0{
+				/Intel/:{ $packages += ['intel-microcode']}
+				/AMD/:{ $packages += ['amd-microcode']}
+			}
+		}
+	}
 	case $::operatingsystem{
 		'Debian': {
-			$packages = ['logwatch', 'git', 'htop', 'nload', 'sysstat', 'iftop', 'nmap', 'screen', 'fail2ban', 'postfix', 'tcpdump', 'mtr', 'vim', 'bash-completion', 'ferm', 'iptraf', 'uptimed', 'acpid', 'munin-node', 'bsd-mailx' ]
-			case $::virtual{
-				'physical': { 
-					$packages += ['smartmontools', 'ethtool', 'pciutils', 'ethtool', 'lm-sensors']
-					case $::processor0{
-						/Intel/:{ $packages += ['intel-microcode']}
-						/AMD/:{ $packages += ['amd-microcode']}
-					}
-				}
-			}
+			$packages += ['augeas-tools', 'uptimed']
 			package { $packages:
-				ensure => 'present',
+				ensure => present,
+			}
+		}
+		'CentOS':{
+			$packages += ['augeas']
+			package{$packages:
+				ensure => present,
 			}
 		}
 		'Gentoo':{
@@ -34,7 +60,7 @@ class generic-setup::packages {
 					portage::package{['sys-fs/lvm2', 'app-arch/bzip2']:
 						use => ['static', 'static-libs'],	
 					}
-					portage::package{['sys-apps/lm_sensors', 'sys-apps/pciutils', 'sys-libs/zlib', 'dev-libs/openssl']:
+					portage::package{['sys-apps/lm_sensors', 'sys-apps/pciutils', 'sys-libs/zlib', 'dev-libs/openssl', 'app-admin/augeas']:
 						use => 'static-libs',
 					}
 					portage::package{'app-emulation/libvirt':
