@@ -1,5 +1,5 @@
 # this class should build gentoos make.conf
-class generic-setup::system-configuration {
+class genericsetup::basesystem {
 	case $::operatingsystem{
 		'gentoo':{
 			include portage
