@@ -3,7 +3,7 @@
 # todo: install pflogsumm only for mailserver
 # todo: load modules for lm-sensors
 # todo: we currently only support gentoo on physical hosts
-# todo: screen config
+# todo: munin-node config
 class genericsetup::packages {
 	$packages_for_centos_and_debian = [	'logwatch', 
 		'git', 
@@ -17,7 +17,6 @@ class genericsetup::packages {
 		'postfix', 
 		'tcpdump', 
 		'mtr', 
-		'vim', 
 		'bash-completion', 
 		'ferm', 
 		'iptraf', 
@@ -45,13 +44,13 @@ class genericsetup::packages {
 	}
 	case $::operatingsystem {
 		'Debian': {
-			$packages_debian = [ 'augeas-tools', 'uptimed' ]
+			$packages_debian = [ 'augeas-tools', 'uptimed', 'vim' ]
 			package { [ $packages_for_centos_and_debian_including_physical_hosts_and_their_cpu, $packages_debian ]:
 				ensure => present,
 			}
 		}
 		'CentOS': {
-			$packages_centos = [ 'augeas' ]
+			$packages_centos = [ 'augeas', 'vim-minimal' ]
 			package { [ $packages_for_centos_and_debian_including_physical_hosts_and_their_cpu, $packages_centos ]:
 				ensure => present,
 			}
@@ -103,5 +102,15 @@ class genericsetup::packages {
 				}
 			}
 		}
+	}
+	file{ 'screen-config':
+		path 		=> '/root/.screenrc',
+		ensure 	=> present,
+		source 	=> 'puppet:///modules/genericsetup/screenrc',
+	}
+	file{ 'vim-config':
+		path 		=> '/root/.vimrc',
+		ensure 	=> present,
+		source 	=> 'puppet:///modules/genericsetup/vimrc',
 	}
 }

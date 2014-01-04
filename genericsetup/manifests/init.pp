@@ -3,4 +3,5 @@ class genericsetup {
 	include genericsetup::packages
 	include genericsetup::ssh
 	include genericsetup::duply
+	include genericsetup::zeyple
 }
