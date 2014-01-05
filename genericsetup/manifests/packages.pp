@@ -4,6 +4,8 @@
 # todo: load modules for lm-sensors
 # todo: we currently only support gentoo on physical hosts
 # todo: munin-node config
+# todo: remove ferm from autostart
+# todo: create ferm config
 class genericsetup::packages {
 	$packages_for_centos_and_debian = [	'logwatch', 
 		'git', 
