@@ -1,0 +1,2 @@
+#!/bin/bash
+var=($(ssh-keygen -lf /etc/ssh/ssh_host_rsa_key.pub)); echo "rsa_host_key_size=${var[0]}"
