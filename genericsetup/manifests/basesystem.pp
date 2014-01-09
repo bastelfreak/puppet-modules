@@ -21,7 +21,7 @@ class genericsetup::basesystem {
 			}
 			$makeopts = $::processorcount + 1
 			portage::makeconf{'MAKEOPTS':
-				content => $makeopts,
+				content => "-j${makeopts}",
 				ensure => present,
 			}
 			portage::makeconf{'SYNC':

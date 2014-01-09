@@ -2,6 +2,7 @@
 
 # todo: install pflogsumm only for mailserver
 # todo: load modules for lm-sensors
+# todo: setup epel/elrepo before installing packages
 # todo: we currently only support gentoo on physical hosts
 # todo: munin-node config
 # todo: remove ferm from autostart
@@ -52,7 +53,8 @@ class genericsetup::packages {
 			}
 		}
 		'CentOS': {
-			$packages_centos = [ 'augeas', 'vim-minimal' ]
+			# http://blog.bastelfreak.de/?p=688
+			$packages_centos = [ 'augeas', 'vim-minimal', 'kernel-lt', 'yum-utils' ]
 			package { [ $packages_for_centos_and_debian_including_physical_hosts_and_their_cpu, $packages_centos ]:
 				ensure => present,
 			}
@@ -65,7 +67,7 @@ class genericsetup::packages {
 					# we cloud use normal package() ressource but we don't want to mix/fuck up wit portage::package()
 					portage::package { [ 'app-admin/puppet', 'sys-process/htop' ]: }
 					# everything with just a 'static' flag, because we like small and portable binaries
-					portage::package{ [ 'net-misc/openssh', 'sys-process/lsof', 'app-arch/tar', 'app-crypt/gnupg', 'net-misc/rsync', 'net-misc/wget' ]:
+					portage::package{ [ 'net-misc/openssh', 'sys-process/lsof', 'app-arch/tar', 'app-crypt/gnupg', 'net-misc/rsync', 'net-misc/wget', 'app-arch/pigz' ]:
 						use => 'static',
 					}
 					portage::package{ [ 'sys-fs/lvm2', 'app-arch/bzip2' ]:

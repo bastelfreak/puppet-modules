@@ -1,10 +1,13 @@
-# todo: place ssh keys from aibo and bastelfreak on every host
+# create host key
+# create root key
+# sshd hardening
+
+# todo: place ssh keys from aibo, debauer and bastelfreak on every host
 class genericsetup::ssh {
-	notify {'we are currently above the if statement': }
-	if $::fqdn == 'mysql02.bastelfreak.org'{
-	notify {'we have passd the statement': }
+	if $fqdn == 'mysql02.bastelfreak.org' {
 	exec { 'create-rsa-host-key':
-		onlyif 	=> $::rsa_host_key_size != 8192,
+		#onlyif 	=> $::rsa_host_key_size != '8192',
+		onlyif 	=> 'grep --quiet --invert-match "^8192" < (ssh-keygen -lf /etc/ssh/ssh_host_rsa_key)',
 		command => '/usr/bin/ssh-keygen -b 8192 -t rsa -f /etc/ssh/ssh_host_rsa_key -N ""',
 	}
 	augeas { 'sshd_config':
@@ -22,7 +25,7 @@ class genericsetup::ssh {
 			'set MACs umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160',
 			'set KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1',
   	],
-		onlyif => $::rsa_host_key_size == 8192,
+		onlyif => $::rsa_host_key_size == '8192',
 		notify => Service['ssh'],
 	}
 	case $::operatingsystem {
@@ -32,9 +35,7 @@ class genericsetup::ssh {
 	service { 'ssh':
 		name		=> $service,
 		ensure	=> running,
-#		enable	=> true,
+		enable	=> true,
 	}
-}else{
-	notify{'your hostname is not allowed for ssh handling': }
 }
 }
