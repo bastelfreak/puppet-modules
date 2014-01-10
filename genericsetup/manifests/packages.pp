@@ -59,62 +59,79 @@ class genericsetup::packages {
 				ensure => present,
 			}
 		}
-		'Gentoo':{
+		'Gentoo': {
 			include portage
 			case $::virtual {
-				'physical':{
+				'physical': {
 					# list of packages that we need without any special use flags
 					# we cloud use normal package() ressource but we don't want to mix/fuck up wit portage::package()
 					portage::package { [ 'app-admin/puppet', 'sys-process/htop' ]: }
 					# everything with just a 'static' flag, because we like small and portable binaries
-					portage::package{ [ 'net-misc/openssh', 'sys-process/lsof', 'app-arch/tar', 'app-crypt/gnupg', 'net-misc/rsync', 'net-misc/wget', 'app-arch/pigz' ]:
+					portage::package { [ 'net-misc/openssh', 'sys-process/lsof', 'app-arch/tar', 'app-crypt/gnupg', 'net-misc/rsync', 'net-misc/wget', 'app-arch/pigz' ]:
 						use => 'static',
 					}
-					portage::package{ [ 'sys-fs/lvm2', 'app-arch/bzip2' ]:
+					portage::package { [ 'sys-fs/lvm2', 'app-arch/bzip2' ]:
 						use => [ 'static', 'static-libs' ],	
 					}
-					portage::package{ [ 'sys-apps/lm_sensors', 'sys-apps/pciutils', 'sys-libs/zlib', 'dev-libs/openssl', 'app-admin/augeas' ]:
+					portage::package { [ 'sys-apps/lm_sensors', 'sys-apps/pciutils', 'sys-libs/zlib', 'dev-libs/openssl', 'app-admin/augeas' ]:
 						use => 'static-libs',
 					}
-					portage::package{ 'app-emulation/libvirt':
+					portage::package { 'app-emulation/libvirt':
 						use => [ 'lvm', 'lxc', 'nfs', 'pcap', 'python', 'virt-network', 'sasl', 'iscsi' ],
 					}
-					portage::package{ 'app-emulation/qemu':
+					portage::package { 'app-emulation/qemu':
 						use => [ 'sasl', 'python', 'tls', 'virtfs', 'xattr', 'static-user' ],
 					}
-					portage::package{ 'mail-mta/postfix':
+					portage::package { 'mail-mta/postfix':
 						use => 'mbox',
 					}
-					portage::package{ 'sys-block/parted':
+					portage::package { 'sys-block/parted':
 						use => [ 'static-libs', 'device-mapper' ],
 					}
-					portage::package{ 'net-analyzer/tcpdump':
+					portage::package { 'net-analyzer/tcpdump':
 						use => 'samba',
 					}
-					portage::package{ 'sys-apps/smartmontools':
+					portage::package { 'sys-apps/smartmontools':
 						use => [ 'static', 'minimal' ],
 					}
-					portage::package{ 'app-admin/sysstat':
+					portage::package { 'app-admin/sysstat':
 						use => 'lm_sensors',
 					}
-					portage::package{ 'net-dns/dnsmasq':
+					portage::package { 'net-dns/dnsmasq':
 						use => [ 'dhcp-tools', 'conntrack' ],
 					}
-					portage::package{ 'net-analyzer/nmap':
+					portage::package { 'net-analyzer/nmap':
 						use => [ 'nmap-update', 'nping', 'ncat', 'ndiff' ],
 					}
 				}
 			}
 		}
 	}
-	file{ 'screen-config':
+	file { 'screen-config':
 		path 		=> '/root/.screenrc',
 		ensure 	=> present,
 		source 	=> 'puppet:///modules/genericsetup/screenrc',
 	}
-	file{ 'vim-config':
+	file { 'vim-config':
 		path 		=> '/root/.vimrc',
 		ensure 	=> present,
 		source 	=> 'puppet:///modules/genericsetup/vimrc',
+	}
+	$vim_dirs = ['/root/.vim', '/root/.vim/autoload', '/root/.vim/bundle']
+	file { $vim_dirs:
+		ensure 	=> directory,
+		owner 	=> 'root',
+		group		=> 'root'
+	}
+	exec { 'setup-vim1':
+		command => 'curl -Sso /root/.vim/autoload/pathogen.vim https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim',
+		require => File[$vim_dirs],
+		creates	=> '/root/.vim/autoload/pathogen.vim',
+	}
+	exec { 'setup-vim2':
+		command => 'git clone https://github.com/scrooloose/syntastic.git',
+		require => Exec['setup-vim1'],
+		cwd 		=> '/root/.vim/bundle',
+		creates	=> '/root/.vim/bundle/syntastic',
 	}
 }
