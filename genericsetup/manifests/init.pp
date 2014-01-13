@@ -1,11 +1,8 @@
 # setup epel/elrepo before class packages
 class genericsetup {
 	case $::operatingsystem{
-		'centOS': {
-			class { 'yum':
-  			extrarepo => [ 'epel' , 'puppetlabs', 'elrepo' ],
-			}
-		}
+		'centOS': { include genericsetup::centosrepo }
+		'Debian': { include genericsetup::debianrepo }
 	}
 	include genericsetup::basesystem
 	include genericsetup::facts
